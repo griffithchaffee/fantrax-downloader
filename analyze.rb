@@ -22,7 +22,6 @@ csv = CSV.parse(File.read("players.csv"), headers: true)
 games_by_player = csv.map(&:to_hash).group_by { |h| h["Player"] }
 results = {}
 games_by_player.each do |player, hashes|
-  puts hashes.first
   #next if !hashes.first || hashes.first["Owner"] != "FA"
   hashes.each do |hash|
     next if hash["Minutes Played"].to_i <= 30
@@ -38,5 +37,18 @@ results.each do |player, fpts|
 end
 
 trends.sort_by { |k,v| -v[:slope] }.each do |player, trend|
-  puts "#{player.ljust(20)} - #{trend}"
+  puts "#{player.ljust(20)} - #{trend[:slope].round(1) * -1}"
+end
+
+sums = {}
+games_by_player.each do |player, hashes|
+  hashes.each do |hash|
+    next if !["D", "D,M"].include?(hash["Position"])
+    sums[hash["Opponent"]] ||= 0
+    sums[hash["Opponent"]] += hash["Fantasy Points"].to_f
+  end
+end
+
+sums.sort_by { |k,v| -v }.each do |k,v|
+  puts "#{k}: #{v}"
 end
