@@ -118,6 +118,7 @@ class FantraxClient
       "Team",
       "Position",
       "Owner",
+      "Next Opponent",
       "TFPts",
       "TFP/G",
       "Rostered %",
@@ -173,6 +174,7 @@ class FantraxClient
         player_row["Position"],
         # sometimes is a value like "W <small>(Wed)</small>"
         player_row["Status"].include?("<small>") ? "FA" : player_row["Status"],
+        player_row["Opponent"],
         player_row["FPts"],
         player_row["FP/G"],
         player_row["Ros"],

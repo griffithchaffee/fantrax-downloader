@@ -31,13 +31,21 @@ games_by_player.select! do |player, hashes|
   true
 end
 
+
+next_games = {}
+games_by_player.each do |player, hashes|
+  hashes.each do |hash|
+    next_games[hash["Team"]] ||= hash["Next Opponent"]
+  end
+end
+
+
 puts
 puts "========= TRENDING UP ========="
 results = {}
 games_by_player.each do |player, hashes|
   next if !hashes.first || hashes.first["Owner"] != "FA"
   hashes.each do |hash|
-    #next if %w[ 04qfq 04e1e ].include?(hash["ID"])
     next if hash["Minutes Played"].to_i <= 30
     results[player] ||= []
     results[player] << hash["Fantasy Points"].to_f
@@ -53,6 +61,7 @@ trends.sort_by { |k,v| -v[:slope] }.last(40).each do |player, trend|
   puts "#{player.ljust(20)} - #{trend[:slope].round(1) * -1}"
 end
 
+
 puts
 puts "========= Defensive Points ========="
 results.clear
@@ -65,8 +74,9 @@ games_by_player.each do |player, hashes|
 end
 
 results.sort_by { |k,v| -v }.each do |k,v|
-  puts "#{k}: #{v}"
+  puts "#{k}: #{v.round} (#{next_games[k]})"
 end
+
 
 puts
 puts "========= Mid Points ========="
@@ -80,9 +90,24 @@ games_by_player.each do |player, hashes|
 end
 
 results.sort_by { |k,v| -v }.each do |k,v|
-  puts "#{k}: #{v}"
+  puts "#{k}: #{v.round} (#{next_games[k]})"
 end
 
+
+puts
+puts "========= Forward Points ========="
+results.clear
+games_by_player.each do |player, hashes|
+  hashes.each do |hash|
+    next if !["F", "M,F"].include?(hash["Position"])
+    results[hash["Opponent"]] ||= 0
+    results[hash["Opponent"]] += hash["Fantasy Points"].to_f
+  end
+end
+
+results.sort_by { |k,v| -v }.each do |k,v|
+  puts "#{k}: #{v.round} (#{next_games[k]})"
+end
 
 puts
 puts "========= No G/A Fpts ========="
@@ -106,12 +131,12 @@ games_by_player.each do |player, hashes|
   results[name.join(" - ")] = fpts / mins
 end
 
-results.sort_by { |k,v| -v }.first(40).each do |k,v|
+results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(10).each do |k,v|
   puts "#{k}: #{v}"
 end
 
 puts
-puts "========= Curve Fpts ========="
+puts "========= Ftps / Mins No Outliers ========="
 results.clear
 games_by_player.each do |player, hashes|
   fpts = []
@@ -132,6 +157,6 @@ games_by_player.each do |player, hashes|
   results[name.join(" - ")] = fpts / mins
 end
 
-results.sort_by { |k,v| -v }.first(40).each do |k,v|
+results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(10).each do |k,v|
   puts "#{k}: #{v}"
 end
