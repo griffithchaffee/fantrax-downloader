@@ -1,5 +1,6 @@
 require 'csv'
 require 'pry'
+require 'active_support/all'
 
 class Array
 
@@ -29,6 +30,11 @@ games_by_player.select! do |player, hashes|
   next if hashes.sum { |h| h["Minutes Played"].to_f } <= 300
   #next if hash["Owner"] != "FA"
   true
+end
+games_by_player.each do |player, hashes|
+  hashes.select! do |hash|
+    Date.parse(hash["Date"]) >= 45.days.ago
+  end
 end
 
 
