@@ -127,11 +127,11 @@ games_by_player.each do |player, hashes|
     fpts -= 7 * hash["Assists (Fantasy)"].to_f
     mins += hash["Minutes Played"].to_f
   end
-  next if mins <= 400
+  next if mins <= 300
   results[name.join(" - ")] = fpts / mins
 end
 
-results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(10).each do |k,v|
+results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(20).each do |k,v|
   puts "#{k}: #{v}"
 end
 
@@ -149,7 +149,7 @@ games_by_player.each do |player, hashes|
     fpts.push(hash["Fantasy Points"].to_f)
     mins += hash["Minutes Played"].to_f
   end
-  next if mins <= 400
+  next if mins <= 300
   fpts.delete(fpts.max)
   fpts.delete(fpts.min)
   fpts = fpts.sum
@@ -157,6 +157,6 @@ games_by_player.each do |player, hashes|
   results[name.join(" - ")] = fpts / mins
 end
 
-results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(10).each do |k,v|
+results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(20).each do |k,v|
   puts "#{k}: #{v}"
 end
