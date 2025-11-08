@@ -1,5 +1,6 @@
 require 'csv'
 require 'pry'
+require 'active_support/all'
 
 class Array
 
@@ -28,6 +29,11 @@ games_by_player.select! do |player, hashes|
   next if %w[ 04qfq 04e1e ].include?(hash["ID"])
   #next if hash["Owner"] != "FA"
   true
+end
+games_by_player.each do |player, hashes|
+  hashes.select! do |hash|
+    Date.parse(hash["Date"]) >= 45.days.ago
+  end
 end
 
 

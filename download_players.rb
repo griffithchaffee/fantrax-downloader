@@ -180,19 +180,22 @@ class FantraxClient
         player_row["Ros"],
         player_row["+/-"],
       ]).to_h
-      begin
-        # needed to prevent rate limit errors
-        sleep 1
-        get_player_games_as_json(player_id: player_hash["ID"]).each do |game|
-          fantasy_headers |= game.keys
-          game_player_hash = player_hash.merge(fantasy_headers.zip(game.values_at(*fantasy_headers)).to_h)
-          game_player_hash["Opponent"].gsub!("@", "")
-          player_hashes << game_player_hash
+      2.times do
+        begin
+          # needed to prevent rate limit errors
+          sleep 1.2
+          get_player_games_as_json(player_id: player_hash["ID"]).each do |game|
+            fantasy_headers |= game.keys
+            game_player_hash = player_hash.merge(fantasy_headers.zip(game.values_at(*fantasy_headers)).to_h)
+            game_player_hash["Opponent"].gsub!("@", "")
+            player_hashes << game_player_hash
+          end
+          break
+        rescue StandardError => error
+          puts "#{error.class}: #{error.message}"
+          puts error.backtrace
+          puts player_hash
         end
-      rescue StandardError => error
-        puts "#{error.class}: #{error.message}"
-        puts error.backtrace
-        puts player_hash
       end
     end
     export_csv_s = CSV.generate(headers: true, force_quotes: true) do |export_csv|
