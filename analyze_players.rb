@@ -2,6 +2,27 @@ require 'csv'
 require 'pry'
 require 'active_support/all'
 
+class Date
+  def number_of_days_ago
+    (Date.today - self).to_i
+  end
+end
+
+class Time
+  delegate(:number_of_days_ago, to: :to_date)
+end
+
+
+
+
+# days of games
+since = 6.weeks.ago
+# minimum minutes played
+minmins = since.number_of_days_ago * 2.5
+
+
+
+
 class Array
 
   # stolen from stackoverflow - no idea how true it is but seems accurate
@@ -27,13 +48,13 @@ games_by_player.select! do |player, hashes|
   hash = hashes.first
   # Ben White, Matt O'Riley
   next if %w[ 04qfq 04e1e ].include?(hash["ID"])
-  next if hashes.sum { |h| h["Minutes Played"].to_f } <= 300
+  next if hashes.sum { |h| h["Minutes Played"].to_f } <= minmins
   #next if hash["Owner"] != "FA"
   true
 end
 games_by_player.each do |player, hashes|
   hashes.select! do |hash|
-    Date.parse(hash["Date"]) >= 45.days.ago
+    Date.parse(hash["Date"]) >= since
   end
 end
 
@@ -50,11 +71,17 @@ puts
 puts "========= TRENDING UP ========="
 results = {}
 games_by_player.each do |player, hashes|
-  next if !hashes.first || hashes.first["Owner"] != "FA"
+  next if !hashes.first || !hashes.first["Owner"].in?(["FA", "Hopeless"])
+  name = [player.ljust(30, " ")]
   hashes.each do |hash|
-    next if hash["Minutes Played"].to_i <= 30
-    results[player] ||= []
-    results[player] << hash["Fantasy Points"].to_f
+    name.unshift(hash["Position"].ljust(3, " ")) if name.size < 4
+    name.unshift(hash["Team"]) if name.size < 4
+    name.unshift(hash["Owner"].ljust(15, " ")) if name.size < 4
+  end
+  hashes.each do |hash|
+    next if hash["Minutes Played"].to_i <= 20
+    results[name.join(" - ")] ||= []
+    results[name.join(" - ")] << hash["Fantasy Points"].to_f
   end
 end
 
@@ -73,7 +100,7 @@ puts "========= Defensive Points ========="
 results.clear
 games_by_player.each do |player, hashes|
   hashes.each do |hash|
-    next if !["D", "D,M"].include?(hash["Position"])
+    next if hash["Position"] !~ /D/
     results[hash["Opponent"]] ||= 0
     results[hash["Opponent"]] += hash["Fantasy Points"].to_f
   end
@@ -89,7 +116,7 @@ puts "========= Mid Points ========="
 results.clear
 games_by_player.each do |player, hashes|
   hashes.each do |hash|
-    next if !["M", "M,F", "D,M"].include?(hash["Position"])
+    next if hash["Position"] !~ /M/
     results[hash["Opponent"]] ||= 0
     results[hash["Opponent"]] += hash["Fantasy Points"].to_f
   end
@@ -105,7 +132,7 @@ puts "========= Forward Points ========="
 results.clear
 games_by_player.each do |player, hashes|
   hashes.each do |hash|
-    next if !["F", "M,F"].include?(hash["Position"])
+    next if hash["Position"] !~ /F/
     results[hash["Opponent"]] ||= 0
     results[hash["Opponent"]] += hash["Fantasy Points"].to_f
   end
@@ -116,7 +143,7 @@ results.sort_by { |k,v| -v }.each do |k,v|
 end
 
 puts
-puts "========= No G/A Fpts ========="
+puts "========= No G/A Fpts - #{since.number_of_days_ago} Days ========="
 results.clear
 games_by_player.each do |player, hashes|
   fpts = 0.0
@@ -133,16 +160,16 @@ games_by_player.each do |player, hashes|
     fpts -= 7 * hash["Assists (Fantasy)"].to_f
     mins += hash["Minutes Played"].to_f
   end
-  next if mins <= 300
+  next if mins <= minmins
   results[name.join(" - ")] = fpts / mins
 end
 
-results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(20).each do |k,v|
-  puts "#{k}: #{v}"
+results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA|Hopeless/ }.first(20).each do |k,v|
+  puts "#{k}: #{v.round(3)}"
 end
 
 puts
-puts "========= Ftps / Mins No Outliers ========="
+puts "========= Ftps / Mins No Outliers - #{since.number_of_days_ago} Days ========="
 results.clear
 games_by_player.each do |player, hashes|
   fpts = []
@@ -155,14 +182,14 @@ games_by_player.each do |player, hashes|
     fpts.push(hash["Fantasy Points"].to_f)
     mins += hash["Minutes Played"].to_f
   end
-  next if mins <= 300
-  fpts.delete(fpts.max)
-  fpts.delete(fpts.min)
+  next if mins <= minmins
+  #fpts.delete(fpts.max)
+  #fpts.delete(fpts.min)
   fpts = fpts.sum
   next if fpts <= 0
   results[name.join(" - ")] = fpts / mins
 end
 
-results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(20).each do |k,v|
-  puts "#{k}: #{v}"
+results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA|Hopeless/ }.first(20).each do |k,v|
+  puts "#{k}: #{v.round(3)}"
 end
