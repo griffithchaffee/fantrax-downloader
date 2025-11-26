@@ -33,7 +33,7 @@ games_by_player.select! do |player, hashes|
 end
 games_by_player.each do |player, hashes|
   hashes.select! do |hash|
-    Date.parse(hash["Date"]) >= 45.days.ago
+    Date.parse(hash["Date"]) >= 50.days.ago
   end
 end
 
@@ -138,7 +138,7 @@ games_by_player.each do |player, hashes|
 end
 
 results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(10).each do |k,v|
-  puts "#{k}: #{v}"
+  puts "#{k}: #{v.round(3)}"
 end
 
 puts
@@ -164,5 +164,5 @@ games_by_player.each do |player, hashes|
 end
 
 results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(10).each do |k,v|
-  puts "#{k}: #{v}"
+  puts "#{k}: #{v.round(3)}"
 end

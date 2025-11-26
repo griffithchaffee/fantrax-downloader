@@ -67,13 +67,19 @@ end
 
 
 puts
-puts "========= Goalie Points ========="
+puts "========= Goalie Points (max removed) ========="
 results.clear
+max = {}
 games_by_player.each do |player, hashes|
   hashes.each do |hash|
+    max[hash["Opponent"]] = hash["Fantasy Points"].to_f if hash["Fantasy Points"].to_f > (max[hash["Opponent"]] || 0)
     results[hash["Opponent"]] ||= 0
     results[hash["Opponent"]] += hash["Fantasy Points"].to_f
   end
+end
+# remove max
+max.each do |k,v|
+  results[k] -= v if results[k]
 end
 
 results.sort_by { |k,v| -v }.each do |k,v|
