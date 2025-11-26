@@ -32,7 +32,7 @@ games_by_player.select! do |player, hashes|
 end
 games_by_player.each do |player, hashes|
   hashes.select! do |hash|
-    Date.parse(hash["Date"]) >= 45.days.ago
+    Date.parse(hash["Date"]) >= 60.days.ago
   end
 end
 
