@@ -32,7 +32,7 @@ games_by_player.select! do |player, hashes|
 end
 games_by_player.each do |player, hashes|
   hashes.select! do |hash|
-    Date.parse(hash["Date"]) >= 60.days.ago
+    Date.parse(hash["Date"]) >= 45.days.ago
   end
 end
 
@@ -79,7 +79,7 @@ games_by_player.each do |player, hashes|
 end
 # remove max
 max.each do |k,v|
-  results[k] -= v if results[k]
+  #results[k] -= v if results[k]
 end
 
 results.sort_by { |k,v| -v }.each do |k,v|
@@ -107,6 +107,6 @@ games_by_player.each do |player, hashes|
   results[name.join(" - ")] = fpts / mins
 end
 
-results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA/ }.first(10).each do |k,v|
+results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA|Hopeless/ }.first(10).each do |k,v|
   puts "#{k}: #{v}"
 end

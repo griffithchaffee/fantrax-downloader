@@ -191,5 +191,5 @@ games_by_player.each do |player, hashes|
 end
 
 results.sort_by { |k,v| -v }.select { |k,v| k =~ /FA|Hopeless/ }.first(20).each do |k,v|
-  puts "#{k}: #{v.round(3)}"
+  puts "#{k}: #{v.to_f.round(3)}"
 end
