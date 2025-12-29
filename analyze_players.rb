@@ -16,9 +16,9 @@ end
 
 
 # days of games
-since = 6.weeks.ago
+since = 4.weeks.ago
 # minimum minutes played
-minmins = since.number_of_days_ago * 2.5
+minmins = since.number_of_days_ago / 7 * 60
 
 
 
